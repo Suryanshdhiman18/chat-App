@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Chat App</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-container">
+    <h2>Welcome to ChatApp</h2>
+
+    <div class="form-group">
+        <input type="text" id="username" placeholder="Enter username" required>
+    </div>
+
+    <div class="form-group">
+        <input type="password" id="password" placeholder="Enter password" required>
+    </div>
+
+    <div class="form-buttons">
+        <button onclick="login()">Login</button>
+        <button onclick="signup()">Sign Up</button>
+    </div>
+</div>
+
+<script>
+    async function login() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!username || !password) {
+            alert("Enter username and password");
+            return;
+        }
+
+        const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+            localStorage.setItem("username", username);
+            window.location.href = "index.html";  // go to chat
+        } else {
+            alert("Invalid login!");
+        }
+    }
+
+    async function signup() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        const res = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+            alert("Signup successful! Please login.");
+        } else {
+            alert("Signup failed. Try again!");
+        }
+    }
+</script>
+</body>
+</html>

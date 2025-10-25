@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat App</title>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- WebSocket libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<div class="chat-container">
+    <h2>Chat App</h2>
+
+    <div class="controls">
+        <label for="chatType">Chat Type:</label>
+        <select id="chatType">
+            <option value="broadcast">Broadcast</option>
+            <option value="private">Private</option>
+        </select>
+
+        <input type="text" id="receiver" placeholder="Receiver username (for private)" />
+    </div>
+
+    <div id="messageArea" class="chat-box"></div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<!-- Your main chat logic -->
+<script src="js/chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+/* Chat App UI Styling */
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #ece5dd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.chat-container {
+    background-color: #fff;
+    width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-container h2 {
+    text-align: center;
+    background-color: #075e54;
+    color: white;
+    padding: 12px 0;
+    margin: 0;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #f0f0f0;
+}
+
+.controls select,
+.controls input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #fafafa;
+}
+
+.chat-message {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background-color: #dcf8c6;
+    border-radius: 8px;
+    width: fit-content;
+    max-width: 80%;
+}
+
+.chat-message strong {
+    color: #075e54;
+}
+
+.timestamp {
+    font-size: 0.8em;
+    color: gray;
+    margin-left: 5px;
+}
+
+.input-area {
+    display: flex;
+    padding: 10px;
+    background-color: #f0f0f0;
+}
+
+.input-area input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+}
+
+.input-area button {
+    background-color: #25d366;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+.input-area button:hover {
+    background-color: #20b357;
+}
