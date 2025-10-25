@@ -20,6 +20,13 @@ function connect() {
     });
 }
 
+// Logout handler
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("username"); // remove stored username
+    window.location.href = "/login.html"; // redirect to login page
+});
+
+
 function sendMessage() {
     const content = document.getElementById('messageInput').value;
     const chatType = document.getElementById('chatType').value;

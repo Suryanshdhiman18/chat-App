@@ -11,6 +11,7 @@ body {
 }
 
 .chat-container {
+    height: 560px;
     background-color: #fff;
     width: 400px;
     border-radius: 12px;
@@ -95,3 +96,26 @@ body {
 .input-area button:hover {
     background-color: #20b357;
 }
+
+.chat-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+#logoutBtn {
+    margin-top: 10px;
+    margin-right: 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#logoutBtn:hover {
+    background-color: #e04343;
+}
+
+

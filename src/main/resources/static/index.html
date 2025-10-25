@@ -15,6 +15,11 @@
 <div class="chat-container">
     <h2>Chat App</h2>
 
+    <div class="chat-header">
+        <button id="logoutBtn">Logout</button>
+        <span id="loggedInUsername"></span>
+    </div>
+
     <div class="controls">
         <label for="chatType">Chat Type:</label>
         <select id="chatType">
@@ -37,3 +42,45 @@
 <script src="js/chat.js"></script>
 </body>
 </html>
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Chat | ChatApp</title>-->
+<!--    <link rel="stylesheet" href="/css/chat.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="chat-container">-->
+
+<!--    &lt;!&ndash; Sidebar &ndash;&gt;-->
+<!--    <aside class="sidebar">-->
+<!--        <div class="sidebar-header">-->
+<!--            <h3>ChatApp</h3>-->
+<!--            <button id="logoutBtn">Logout</button>-->
+<!--        </div>-->
+<!--        <div class="sidebar-user">-->
+<!--            <p><strong>You:</strong> <span id="currentUser"></span></p>-->
+<!--        </div>-->
+<!--        <div class="sidebar-placeholder">-->
+<!--            <p>More users will appear here later</p>-->
+<!--        </div>-->
+<!--    </aside>-->
+
+<!--    &lt;!&ndash; Main chat area &ndash;&gt;-->
+<!--    <main class="chat-main">-->
+<!--        <div id="chatBox" class="chat-box"></div>-->
+
+<!--        <div class="chat-input">-->
+<!--            <input type="text" id="messageInput" placeholder="Type a message..." />-->
+<!--            <button id="sendBtn">Send</button>-->
+<!--        </div>-->
+<!--    </main>-->
+
+<!--</div>-->
+
+<!--<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>-->
+<!--<script src="/js/chat.js"></script>-->
+<!--</body>-->
+<!--</html>-->
