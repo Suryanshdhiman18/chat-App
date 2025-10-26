@@ -19,12 +19,6 @@ public class ChatController {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    // ✅ Broadcast message to everyone
-//    @MessageMapping("/chat.broadcast")
-//    @SendTo("/topic/public")
-//    public Message broadcastMessage(@Payload Message message) {
-//        return message;
-//    }
     @MessageMapping("/chat.broadcast")
     @SendTo("/topic/public")
     public Message sendPublicMessage(@Payload Message message) {
@@ -32,15 +26,10 @@ public class ChatController {
         return message;
     }
 
-
-    // ✅ Send private message to a specific user
-//    @MessageMapping("/chat.private.{receiver}")
-//    public void sendPrivateMessage(@DestinationVariable String receiver, @Payload Message message) {
-//        simpMessagingTemplate.convertAndSendToUser(receiver, "/queue/private", message);
-//    }
     @MessageMapping("/chat.private.{receiver}")
     public void sendPrivateMessage(@DestinationVariable String receiver, Message message) {
         message.setTimestamp(LocalDateTime.now());
+        System.out.println("Private message from " + message.getSender() + " to " + receiver + ": " + message.getContent());
         simpMessagingTemplate.convertAndSendToUser(receiver, "/queue/private", message);
     }
 
