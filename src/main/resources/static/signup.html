@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-container">
+    <h2>Create Account</h2>
+
+    <input type="text" id="email" placeholder="Email" required>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+    <button onclick="signup()">Sign Up</button>
+
+    <p>Already have an account? <a href="login.html">Back to Login</a></p>
+
+    <p id="signupMessage"></p>
+</div>
+
+<script>
+    async function signup() {
+      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const messageBox = document.getElementById('signupMessage');
+
+      if (!email || !username || !password) {
+        messageBox.textContent = "All fields are required!";
+        messageBox.style.color = "red";
+        return;
+      }
+
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, username, password })
+      });
+
+      if (response.ok) {
+        messageBox.textContent = "Account created successfully!";
+        messageBox.style.color = "green";
+        setTimeout(() => window.location.href = "login.html", 1500);
+      } else {
+        const error = await response.text();
+        messageBox.textContent = error || "Signup failed — please try again.";
+        messageBox.style.color = "red";
+      }
+    }
+</script>
+</body>
+</html>

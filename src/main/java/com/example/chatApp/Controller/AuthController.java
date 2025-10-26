@@ -18,12 +18,17 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody User user) {
-        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser.isPresent()) {
+        if (userRepository.existsByUsername(user.getUsername())) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
+
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.badRequest().body("Email already registered");
+        }
+
+        user.setPassword(user.getPassword()); // TODO: hash this later
         userRepository.save(user);
-        return ResponseEntity.ok("Signup successful");
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
