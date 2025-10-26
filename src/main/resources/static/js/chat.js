@@ -32,34 +32,36 @@ function connect(user) {
 }
 
 function updateActiveUsers(users) {
-    const contactList = document.getElementById('contactList');
+  const contactList = document.getElementById('contactList');
+  if (!contactList) return;
 
-    // Preserve the first static “Active Users” block
-    const staticHeader = contactList.querySelector('.contact[data-username="broadcast"]');
-    contactList.innerHTML = '';
-    contactList.appendChild(staticHeader);
+  // keep static header (first element with data-username="broadcast")
+  const header = contactList.querySelector('.contact[data-username="broadcast"]');
+  contactList.innerHTML = '';
+  if (header) contactList.appendChild(header);
 
-    users.forEach(user => {
-        // Skip yourself (so you don’t see your own name in the list)
-        if (user === username) return;
+  // add users
+  users.forEach(user => {
+    // skip if username is the broadcast header string or if same as current user
+    if (user === 'broadcast' || user === username) return;
 
-        const contact = document.createElement('div');
-        contact.classList.add('contact');
-        contact.dataset.username = user;
+    const contact = document.createElement('div');
+    contact.classList.add('contact');
+    contact.dataset.username = user;
+    contact.innerHTML = `<div class="contact-name">${user}</div>`;
 
-        contact.innerHTML = `
-            <div class="contact-name">${user}</div>
-        `;
-
-        // Click event — when you click, start private chat
-        contact.addEventListener('click', function () {
-            document.getElementById('chatMode').value = 'private';
-            document.getElementById('privateReceiver').value = user;
-            highlightSelectedContact(user);
-        });
-
-        contactList.appendChild(contact);
+    // clicking selects private chat with that user
+    contact.addEventListener('click', () => {
+      document.getElementById('chatType').value = 'private';
+      document.getElementById('receiver').value = user;
+      // UI highlight
+      document.querySelectorAll('#contactList .contact').forEach(c => c.classList.remove('active'));
+      contact.classList.add('active');
+      document.getElementById('chatWith').textContent = `${user}`;
     });
+
+    contactList.appendChild(contact);
+  });
 }
 
 // helper to highlight the selected user in UI
@@ -142,7 +144,8 @@ document.getElementById("messageInput").addEventListener("keypress", (e) => {
 });
 
 window.addEventListener('load', () => {
-  username = localStorage.getItem("username");
+  username = sessionStorage.getItem("username") || localStorage.getItem("username");
+
 
   if (!username) {
     alert("Please login first!");

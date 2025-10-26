@@ -2,13 +2,14 @@ package com.example.chatApp.service;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ActiveUserService {
 
-    private final Set<String> activeUsers = ConcurrentHashMap.newKeySet();
+    private final Set<String> activeUsers = Collections.synchronizedSet(new HashSet<>());
 
     public void addUser(String username) {
         activeUsers.add(username);

@@ -24,7 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (res.ok) {
-      localStorage.setItem("username", username);
+//      localStorage.setItem("username", username);
+      sessionStorage.setItem("username", username);
       window.location.href = "/index.html";
     } else {
       alert("Invalid login credentials");
