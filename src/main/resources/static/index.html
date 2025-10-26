@@ -4,83 +4,100 @@
     <meta charset="UTF-8">
     <title>Chat App</title>
 
-    <!-- External CSS -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- WebSocket libraries -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
-<div class="chat-container">
-    <h2>Chat App</h2>
+<div class="app-container">
+    <!-- Sidebar (contacts + broadcast + logout) -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>Chats</h3>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+        <div class="user-info">
+            <span id="loggedInUsername"></span>
+        </div>
+        <div class="chat-type">
+            <select id="chatType">
+                <option value="broadcast">Broadcast</option>
+                <option value="private">Private</option>
+            </select>
+            <input type="text" id="receiver" placeholder="Enter username for private chat" />
+        </div>
 
-    <div class="chat-header">
-        <button id="logoutBtn">Logout</button>
-        <span id="loggedInUsername"></span>
+        <div class="contact-list" id="contactList">
+            <div class="contact active" data-username="broadcast">
+                <div class="contact-name">Broadcast</div>
+            </div>
+            <!-- dynamic contacts can be listed here -->
+        </div>
     </div>
 
-    <div class="controls">
-        <label for="chatType">Chat Type:</label>
-        <select id="chatType">
-            <option value="broadcast">Broadcast</option>
-            <option value="private">Private</option>
-        </select>
+    <!-- Chat Window -->
+    <div class="chat-window">
+        <div class="chat-header">
+            <h2 id="chatWith">Broadcast Chat</h2>
+        </div>
 
-        <input type="text" id="receiver" placeholder="Receiver username (for private)" />
-    </div>
+        <div id="messageArea" class="message-area"></div>
 
-    <div id="messageArea" class="chat-box"></div>
-
-    <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Type your message..." />
-        <button id="sendBtn" onclick="sendMessage()">Send</button>
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message..." />
+            <button id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
     </div>
 </div>
 
-<!-- Your main chat logic -->
 <script src="js/chat.js"></script>
 </body>
 </html>
+
 
 <!--<!DOCTYPE html>-->
 <!--<html lang="en">-->
 <!--<head>-->
 <!--    <meta charset="UTF-8">-->
-<!--    <title>Chat | ChatApp</title>-->
-<!--    <link rel="stylesheet" href="/css/chat.css">-->
+<!--    <title>Chat App</title>-->
+
+<!--    &lt;!&ndash; External CSS &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="css/style.css">-->
+
+<!--    &lt;!&ndash; WebSocket libraries &ndash;&gt;-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>-->
 <!--</head>-->
 <!--<body>-->
 <!--<div class="chat-container">-->
+<!--    <h2>Chat App</h2>-->
 
-<!--    &lt;!&ndash; Sidebar &ndash;&gt;-->
-<!--    <aside class="sidebar">-->
-<!--        <div class="sidebar-header">-->
-<!--            <h3>ChatApp</h3>-->
-<!--            <button id="logoutBtn">Logout</button>-->
-<!--        </div>-->
-<!--        <div class="sidebar-user">-->
-<!--            <p><strong>You:</strong> <span id="currentUser"></span></p>-->
-<!--        </div>-->
-<!--        <div class="sidebar-placeholder">-->
-<!--            <p>More users will appear here later</p>-->
-<!--        </div>-->
-<!--    </aside>-->
+<!--    <div class="chat-header">-->
+<!--        <button id="logoutBtn">Logout</button>-->
+<!--        <span id="loggedInUsername"></span>-->
+<!--    </div>-->
 
-<!--    &lt;!&ndash; Main chat area &ndash;&gt;-->
-<!--    <main class="chat-main">-->
-<!--        <div id="chatBox" class="chat-box"></div>-->
+<!--    <div class="controls">-->
+<!--        <label for="chatType">Chat Type:</label>-->
+<!--        <select id="chatType">-->
+<!--            <option value="broadcast">Broadcast</option>-->
+<!--            <option value="private">Private</option>-->
+<!--        </select>-->
 
-<!--        <div class="chat-input">-->
-<!--            <input type="text" id="messageInput" placeholder="Type a message..." />-->
-<!--            <button id="sendBtn">Send</button>-->
-<!--        </div>-->
-<!--    </main>-->
+<!--        <input type="text" id="receiver" placeholder="Receiver username (for private)" />-->
+<!--    </div>-->
 
+<!--    <div id="messageArea" class="chat-box"></div>-->
+
+<!--    <div class="input-area">-->
+<!--        <input type="text" id="messageInput" placeholder="Type your message..." />-->
+<!--        <button id="sendBtn" onclick="sendMessage()">Send</button>-->
+<!--    </div>-->
 <!--</div>-->
 
-<!--<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>-->
-<!--<script src="/js/chat.js"></script>-->
+<!--&lt;!&ndash; Your main chat logic &ndash;&gt;-->
+<!--<script src="js/chat.js"></script>-->
 <!--</body>-->
 <!--</html>-->
+
