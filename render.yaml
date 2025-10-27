@@ -1,11 +1,13 @@
 services:
   - type: web
     name: chat-app
-    env: cloud
+    env: docker
     plan: free
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/chatApp-0.0.1-SNAPSHOT.jar
+    dockerfilePath: ./Dockerfile
 
+
+#    buildCommand: ./mvnw clean package -DskipTests
+#    startCommand: java -jar target/chatApp-0.0.1-SNAPSHOT.jar
 #    envVars:
 #      - key: PORT
 #        value: 8080
