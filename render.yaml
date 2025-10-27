@@ -1,7 +1,7 @@
 services:
   - type: web
     name: chat-app
-    env: docker
+    env: cloud
     plan: free
     buildCommand: ./mvnw clean package -DskipTests
     startCommand: java -jar target/chatApp-0.0.1-SNAPSHOT.jar
