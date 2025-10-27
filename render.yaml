@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: chat-app
+    name: chat-App
     env: java
     plan: free
     buildCommand: ./mvnw clean package -DskipTests
