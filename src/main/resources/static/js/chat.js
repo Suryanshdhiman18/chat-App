@@ -22,12 +22,20 @@ function connect(user) {
     stompClient.subscribe('/user/queue/private', function (message) {
       showMessage(JSON.parse(message.body), false);
     });
+
+     stompClient.subscribe('/topic/onlineUsers', function (message) {
+          const users = JSON.parse(message.body);
+          console.log("ONLINE USERS RECEIVED:", users);
+          updateActiveUsers(users);
+//          updateUserList(users);
+      });
+
   });
 
-  stompClient.subscribe('/topic/onlineUsers', function (message) {
-      const users = JSON.parse(message.body);
-      updateUserList(users);
-  });
+//  stompClient.subscribe('/topic/onlineUsers', function (message) {
+//      const users = JSON.parse(message.body);
+//      updateUserList(users);
+//  });
 
 }
 
