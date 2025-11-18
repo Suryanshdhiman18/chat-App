@@ -32,11 +32,6 @@ function connect(user) {
 
   });
 
-//  stompClient.subscribe('/topic/onlineUsers', function (message) {
-//      const users = JSON.parse(message.body);
-//      updateUserList(users);
-//  });
-
 }
 
 function updateActiveUsers(users) {

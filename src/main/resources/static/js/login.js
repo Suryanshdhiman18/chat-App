@@ -32,25 +32,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  signupBtn.addEventListener("click", async () => {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
+//  signupBtn.addEventListener("click", async () => {
+//    const username = document.getElementById("username").value.trim();
+//    const password = document.getElementById("password").value.trim();
+//
+//    if (!username || !password) {
+//      alert("Enter username and password");
+//      return;
+//    }
+//
+//    const res = await fetch("/api/auth/register", {
+//      method: "POST",
+//      headers: { "Content-Type": "application/json" },
+//      body: JSON.stringify({ username, password })
+//    });
+//
+//    if (res.ok) {
+//      alert("Signup successful! Please log in.");
+//    } else {
+//      alert("Signup failed — username may already exist.");
+//    }
+//  });
 
-    if (!username || !password) {
-      alert("Enter username and password");
-      return;
-    }
+document.getElementById("signupBtn").addEventListener("click", function() {
+    window.location.href = "signup.html";
+});
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    });
-
-    if (res.ok) {
-      alert("Signup successful! Please log in.");
-    } else {
-      alert("Signup failed — username may already exist.");
-    }
-  });
 });
