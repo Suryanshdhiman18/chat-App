@@ -1,52 +1,59 @@
-/* Chat App UI Styling */
-
-/* WhatsApp-style Chat App */
+/* ===============================
+   GLOBAL STYLING
+================================= */
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
-  background-color: #e5ddd5;
+  background-color: #d1d7db;
   margin: 0;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
 }
 
+/* Main container */
 .app-container {
   display: flex;
-  width: 90%;
-  max-width: 1100px;
-  height: 90vh;
-  background-color: #fff;
+  width: 95%;
+  max-width: 1200px;
+  height: 92vh;
+  background-color: #ffffff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.25);
 }
 
-/* Sidebar */
+/* ===============================
+   SIDEBAR (WhatsApp style)
+================================= */
+
 .sidebar {
   width: 30%;
   background-color: #075e54;
-  color: #fff;
+  color: #ffffff;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #064c44;
 }
 
 .sidebar-header {
+  padding: 15px 20px;
+  background-color: #064c44;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background-color: #064c44;
 }
 
 .logout-btn {
   background-color: #ff4d4d;
   border: none;
-  color: #fff;
-  padding: 5px 10px;
+  color: white;
+  padding: 6px 12px;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.2s;
 }
 
 .logout-btn:hover {
@@ -54,24 +61,26 @@ body {
 }
 
 .user-info {
-  padding: 10px 15px;
+  padding: 12px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.2);
-  font-weight: bold;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .chat-type {
+  padding: 15px 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 15px;
+  gap: 10px;
 }
 
 .chat-type select,
 .chat-type input {
-  padding: 6px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 8px;
   border: none;
   outline: none;
+  font-size: 0.9rem;
 }
 
 .contact-list {
@@ -80,19 +89,31 @@ body {
   background-color: #0b6158;
 }
 
+/* Contact items */
 .contact {
-  padding: 12px 15px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   cursor: pointer;
-  color: #fff;
+  transition: background 0.2s;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.contact:hover,
-.contact.active {
+.contact:hover {
   background-color: #128c7e;
 }
 
-/* Chat Window */
+.contact.active {
+  background-color: #0f7a70;
+  font-weight: bold;
+}
+
+/* ===============================
+   CHAT WINDOW
+================================= */
+
 .chat-window {
   flex: 1;
   display: flex;
@@ -103,35 +124,51 @@ body {
 .chat-header {
   background-color: #075e54;
   color: white;
-  padding: 15px;
+  padding: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
+.typing-indicator {
+  font-size: 0.85rem;
+  color: #b3ffd1;
+  font-style: italic;
+  margin-left: 10px;
+}
+
+/* Messages */
 .message-area {
   flex: 1;
-  padding: 15px;
+  padding: 20px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
 .chat-message {
-  margin: 6px 0;
-  padding: 10px 14px;
-  border-radius: 10px;
+  margin: 8px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
   max-width: 70%;
-  line-height: 1.4;
   font-size: 0.95rem;
+  line-height: 1.4;
   word-wrap: break-word;
+  position: relative;
 }
 
+/* Sent (right side) */
 .chat-message.own {
-  align-self: flex-end;
   background-color: #dcf8c6;
+  align-self: flex-end;
 }
 
+/* Received (left side) */
 .chat-message.other {
+  background-color: #ffffff;
   align-self: flex-start;
-  background-color: #fff;
 }
 
 .timestamp {
@@ -140,84 +177,112 @@ body {
   margin-left: 8px;
 }
 
+/* ===============================
+   CHAT INPUT
+================================= */
+
 .chat-input {
   display: flex;
   padding: 12px;
   background-color: #f0f0f0;
+  border-top: 1px solid #dcdcdc;
 }
 
 .chat-input input {
   flex: 1;
-  padding: 10px 15px;
+  padding: 12px 16px;
   border-radius: 20px;
   border: 1px solid #ccc;
   outline: none;
+  font-size: 0.95rem;
 }
 
 .chat-input button {
   background-color: #25d366;
-  color: white;
   border: none;
-  padding: 10px 18px;
+  color: white;
+  padding: 12px 18px;
   border-radius: 20px;
-  margin-left: 8px;
+  margin-left: 10px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .chat-input button:hover {
   background-color: #20b357;
 }
 
-.contact {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
-
-.contact:hover {
-    background-color: #f4f4f4;
-}
-
-.contact.active {
-   background-color: #128c7e;
-    font-weight: bold;
-}
+/* ===============================
+   LOGIN PAGE
+================================= */
 
 .login-container {
   width: 350px;
-  margin: 80px auto;
   background: white;
-  padding: 30px;
+  padding: 35px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   text-align: center;
 }
 
 .login-container input {
-  display: block;
   width: 90%;
-  margin: 10px auto;
-  padding: 10px;
+  margin: 10px 0;
+  padding: 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
 
 .login-container button {
   width: 95%;
-  background: #25d366;
-  color: white;
-  border: none;
-  padding: 10px;
-  margin-top: 10px;
+  padding: 12px;
   border-radius: 6px;
+  border: none;
+  background-color: #25d366;
+  color: white;
+  font-size: 1rem;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .login-container button:hover {
-  background: #20b357;
+  background-color: #20b357;
 }
 
+/* ===============================
+   RESPONSIVENESS
+================================= */
 
+/* Tablets */
+@media (max-width: 900px) {
+  .app-container {
+    flex-direction: column;
+    height: 100vh;
+  }
 
+  .sidebar {
+    width: 100%;
+    height: 40%;
+  }
 
+  .chat-window {
+    height: 60%;
+  }
+}
 
+/* Mobile Layout */
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  .app-container {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .chat-window {
+    width: 100%;
+  }
+}

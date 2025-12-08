@@ -1,6 +1,7 @@
 package com.example.chatApp.Controller;
 
 import com.example.chatApp.model.Message;
+import com.example.chatApp.model.MessageTypingDTO;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -40,5 +41,18 @@ public class ChatController {
         simpMessagingTemplate.convertAndSendToUser(receiver, "/queue/private", message);
     }
 
+
+    @MessageMapping("/typing")
+    public void typing(MessageTypingDTO typingDTO) {
+        if (typingDTO.getType().equals("broadcast")) {
+            simpMessagingTemplate.convertAndSend("/topic/typing", typingDTO);
+        } else {
+            simpMessagingTemplate.convertAndSendToUser(
+                    typingDTO.getReceiver(),
+                    "/queue/typing",
+                    typingDTO
+            );
+        }
+    }
 }
 
