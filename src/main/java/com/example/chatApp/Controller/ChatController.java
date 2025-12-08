@@ -1,6 +1,7 @@
 package com.example.chatApp.Controller;
 
 import com.example.chatApp.model.Message;
+import com.example.chatApp.model.MessageStatusDTO;
 import com.example.chatApp.model.MessageTypingDTO;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -9,9 +10,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import java.time.LocalDateTime;
 
 @Controller
 public class ChatController {
@@ -27,21 +25,22 @@ public class ChatController {
         return "redirect:/login.html";
     }
 
+    // BROADCAST
     @MessageMapping("/chat.broadcast")
     @SendTo("/topic/public")
     public Message sendPublicMessage(@Payload Message message) {
-        message.setTimestamp(LocalDateTime.now());
+        System.out.println("MessageID = " + message.getMessageId());
         return message;
     }
 
+    // PRIVATE CHAT
     @MessageMapping("/chat.private.{receiver}")
     public void sendPrivateMessage(@DestinationVariable String receiver, Message message) {
-        message.setTimestamp(LocalDateTime.now());
-        System.out.println("Private message from " + message.getSender() + " to " + receiver + ": " + message.getContent());
+        System.out.println("Private messageId = " + message.getMessageId());
         simpMessagingTemplate.convertAndSendToUser(receiver, "/queue/private", message);
     }
 
-
+    // TYPING INDICATOR
     @MessageMapping("/typing")
     public void typing(MessageTypingDTO typingDTO) {
         if (typingDTO.getType().equals("broadcast")) {
@@ -54,5 +53,16 @@ public class ChatController {
             );
         }
     }
-}
 
+    // MESSAGE STATUS (DELIVERED / SEEN)
+    @MessageMapping("/chat.status.{receiver}")
+    public void updateStatus(@DestinationVariable String receiver, MessageStatusDTO statusDTO) {
+
+        // Forward status update back to original sender
+        simpMessagingTemplate.convertAndSendToUser(
+                statusDTO.getSender(),
+                "/queue/status",
+                statusDTO
+        );
+    }
+}

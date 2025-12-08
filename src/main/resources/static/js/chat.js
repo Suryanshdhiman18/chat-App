@@ -1,199 +1,236 @@
 let stompClient = null;
 let username = null;
 let onlineUsers = new Set();
-let typingTimeout = null;   // timeout handle
-let currentChatUser = null; // whom you are chatting with (private)
-let isTyping = false;
 
-/* ===========================================================
-   CONNECT TO SOCKET
-=========================================================== */
+let typingTimeout = null;
+let isTyping = false;
+let currentChatUser = null;
+
+// stores message DOM elements for tick updates
+let messageStore = {}; // messageId → element
+
+
+/* ---------------------------------------------------
+   CONNECT TO WEBSOCKET
+--------------------------------------------------- */
 function connect(user) {
     username = user;
-    const socket = new SockJS('/ws?user=' + username);
+
+    const socket = new SockJS("/ws?user=" + username);
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function () {
-        console.log("Connected as", username);
+        console.log("CONNECTED as", username);
 
-        /* ---------------- Broadcast messages ---------------- */
-        stompClient.subscribe('/topic/public', function (message) {
-            const msg = JSON.parse(message.body);
-            if (msg.sender !== username) showMessage(msg, false);
+        /* ----------- BROADCAST MESSAGES ----------- */
+        stompClient.subscribe("/topic/public", function (msg) {
+            const m = JSON.parse(msg.body);
+            if (m.sender !== username) showMessage(m, false);
         });
 
-        /* ---------------- Private messages ---------------- */
-        stompClient.subscribe('/user/queue/private', function (message) {
-            showMessage(JSON.parse(message.body), false);
+        /* ----------- PRIVATE MESSAGES ----------- */
+        stompClient.subscribe("/user/queue/private", function (msg) {
+            const m = JSON.parse(msg.body);
+            showMessage(m, false);
+
+            // After receiving → send SEEN status
+            sendStatus(m.messageId, m.sender, "SEEN");
         });
 
-        /* ---------------- TYPING INDICATOR ---------------- */
-        stompClient.subscribe('/topic/typing', function (msg) {
-            handleTyping(JSON.parse(msg.body));
+        /* ----------- TYPING INDICATION ----------- */
+        stompClient.subscribe("/topic/typing", msg => handleTyping(JSON.parse(msg.body)));
+        stompClient.subscribe("/user/queue/typing", msg => handleTyping(JSON.parse(msg.body)));
+
+        /* ----------- MESSAGE STATUS (TICKS) ----------- */
+        stompClient.subscribe("/user/queue/status", function (msg) {
+            const status = JSON.parse(msg.body);
+            updateMessageTicks(status);
         });
 
-        stompClient.subscribe('/user/queue/typing', function (msg) {
-            handleTyping(JSON.parse(msg.body));
-        });
-
-        /* ---------------- Online users list ---------------- */
-        stompClient.subscribe('/topic/onlineUsers', function (message) {
-            const users = JSON.parse(message.body);
-            console.log("ONLINE USERS:", users);
-            onlineUsers = new Set(users);
+        /* ----------- ONLINE USERS ----------- */
+        stompClient.subscribe("/topic/onlineUsers", function (msg) {
+            onlineUsers = new Set(JSON.parse(msg.body));
             updateUserListUI();
         });
     });
 }
 
-/* ===========================================================
-   LOAD USERS FROM DATABASE
-=========================================================== */
+
+/* ---------------------------------------------------
+   LOAD ALL USERS
+--------------------------------------------------- */
 async function loadAllUsers() {
-    try {
-        const response = await fetch("/api/users/all");
-        const users = await response.json();
-
-        window.allUsers = users;
-        updateUserListUI();
-
-    } catch (error) {
-        console.error("Failed to load users list", error);
-    }
+    const res = await fetch("/api/users/all");
+    window.allUsers = await res.json();
+    updateUserListUI();
 }
 
-/* ===========================================================
-   UPDATE CONTACT LIST UI
-=========================================================== */
-function updateUserListUI() {
-    const contactList = document.getElementById("contactList");
-    if (!contactList || !window.allUsers) return;
 
-    const header = contactList.querySelector('.contact[data-username="broadcast"]');
-    contactList.innerHTML = "";
-    if (header) contactList.appendChild(header);
+/* ---------------------------------------------------
+   UPDATE CONTACT LIST
+--------------------------------------------------- */
+function updateUserListUI() {
+    const list = document.getElementById("contactList");
+    if (!list || !window.allUsers) return;
+
+    const header = list.querySelector('.contact[data-username="broadcast"]');
+    list.innerHTML = "";
+    if (header) list.appendChild(header);
 
     window.allUsers.forEach(user => {
         if (user === username) return;
 
-        const contact = document.createElement("div");
-        contact.classList.add("contact");
-        contact.dataset.username = user;
-
         const isOnline = onlineUsers.has(user) ? "🟢" : "⚪";
 
-        contact.innerHTML = `<div class="contact-name">${isOnline} ${user}</div>`;
+        const div = document.createElement("div");
+        div.classList.add("contact");
+        div.dataset.username = user;
+        div.innerHTML = `<div class='contact-name'>${isOnline} ${user}</div>`;
 
-        contact.addEventListener("click", () => {
+        div.addEventListener("click", () => {
             currentChatUser = user;
-            document.getElementById("chatType").value = "private";
             document.getElementById("receiver").value = user;
+            document.getElementById("chatType").value = "private";
 
-            document.querySelectorAll("#contactList .contact")
-                .forEach(c => c.classList.remove("active"));
-            contact.classList.add("active");
+            document.querySelectorAll(".contact").forEach(c => c.classList.remove("active"));
+            div.classList.add("active");
 
-            document.getElementById("chatWith").textContent = `${user}`;
+            document.getElementById("chatWith").innerText = user;
         });
 
-        contactList.appendChild(contact);
+        list.appendChild(div);
     });
 }
 
-/* ===========================================================
+
+/* ---------------------------------------------------
    SEND MESSAGE
-=========================================================== */
+--------------------------------------------------- */
 function sendMessage() {
     const input = document.getElementById("messageInput");
-    const content = input.value.trim();
-    if (!content || !username) return;
+    const text = input.value.trim();
+    if (!text) return;
 
     const chatType = document.getElementById("chatType").value;
     const receiver = document.getElementById("receiver").value;
 
-    const message = {
+    const messageId = crypto.randomUUID(); // unique id
+
+    const msg = {
+        messageId: messageId,
         sender: username,
-        content: content,
+        content: text,
         timestamp: new Date().toISOString()
     };
 
-    showMessage(message, true);
+    const el = showMessage(msg, true);
+    messageStore[messageId] = el;
 
     if (chatType === "broadcast") {
-        stompClient.send("/app/chat.broadcast", {}, JSON.stringify(message));
-    } else if (chatType === "private" && receiver) {
-        stompClient.send(`/app/chat.private.${receiver}`, {}, JSON.stringify(message));
+        stompClient.send("/app/chat.broadcast", {}, JSON.stringify(msg));
+    } else {
+        stompClient.send(`/app/chat.private.${receiver}`, {}, JSON.stringify(msg));
     }
 
     input.value = "";
-    sendTyping(false); // stop typing
+    sendTyping(false);
 }
 
-/* ===========================================================
+
+/* ---------------------------------------------------
    SHOW MESSAGE IN UI
-=========================================================== */
-function showMessage(message, isOwn = false) {
+--------------------------------------------------- */
+function showMessage(msg, isOwn) {
     const area = document.getElementById("messageArea");
-    const el = document.createElement("div");
+    const row = document.createElement("div");
 
-    el.classList.add("chat-message");
-    el.classList.add(isOwn ? "own" : "other");
+    row.classList.add("chat-message", isOwn ? "own" : "other");
 
-    el.innerHTML = `
-        <strong>${message.sender}</strong>: ${message.content}
-        <span class="timestamp">${new Date(message.timestamp).toLocaleTimeString()}</span>
+    row.innerHTML = `
+        <div>
+            <strong>${msg.sender}</strong>: ${msg.content}
+            <span class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+            ${isOwn ? `<span class="ticks" id="tick-${msg.messageId}">✓</span>` : ""}
+        </div>
     `;
 
-    area.appendChild(el);
+    area.appendChild(row);
     area.scrollTop = area.scrollHeight;
+
+    return row;
 }
 
-/* ===========================================================
-   TYPING INDICATOR HANDLER
-=========================================================== */
-function handleTyping(data) {
-    const typingLabel = document.getElementById("typingStatus");
 
-    // Check correct context (broadcast or correct receiver)
+/* ---------------------------------------------------
+   UPDATE MESSAGE TICKS
+--------------------------------------------------- */
+function updateMessageTicks(status) {
+    const tick = document.getElementById("tick-" + status.messageId);
+    if (!tick) return;
+
+    if (status.status === "DELIVERED") tick.innerHTML = "✓✓";
+    if (status.status === "SEEN") {
+        tick.innerHTML = "✓✓";
+        tick.classList.add("seen");
+    }
+}
+
+
+/* ---------------------------------------------------
+   SEND STATUS PACKAGE
+--------------------------------------------------- */
+function sendStatus(messageId, sender, status) {
+    const dto = {
+        messageId: messageId,
+        sender: sender,
+        receiver: username,
+        status: status
+    };
+    stompClient.send(`/app/chat.status.${sender}`, {}, JSON.stringify(dto));
+}
+
+
+/* ---------------------------------------------------
+   TYPING INDICATOR
+--------------------------------------------------- */
+function handleTyping(data) {
+    const label = document.getElementById("typingStatus");
+
     if (data.type === "broadcast") {
-        if (data.sender !== username && data.typing) {
-            typingLabel.innerText = `${data.sender} is typing...`;
-        } else typingLabel.innerText = "";
+        if (data.sender !== username && data.typing)
+            label.innerText = `${data.sender} is typing...`;
+        else label.innerText = "";
     }
 
     if (data.type === "private") {
-        if (data.sender === currentChatUser && data.typing) {
-            typingLabel.innerText = `${data.sender} is typing...`;
-        } else typingLabel.innerText = "";
+        if (data.sender === currentChatUser && data.typing)
+            label.innerText = `${data.sender} is typing...`;
+        else label.innerText = "";
     }
 }
 
-/* ===========================================================
-   SEND TYPING EVENT
-=========================================================== */
-function sendTyping(isTyping) {
-    if (!stompClient) return;
 
+/* ---------------------------------------------------
+   SEND TYPING EVENT
+--------------------------------------------------- */
+function sendTyping(flag) {
     const chatType = document.getElementById("chatType").value;
     const receiver = document.getElementById("receiver").value;
 
-    const typingDTO = {
+    const dto = {
         sender: username,
         type: chatType,
         receiver: receiver,
-        typing: isTyping
+        typing: flag
     };
 
-    if (chatType === "broadcast") {
-        stompClient.send("/app/typing.broadcast", {}, JSON.stringify(typingDTO));
-    } else if (chatType === "private") {
-        stompClient.send(`/app/typing.private.${receiver}`, {}, JSON.stringify(typingDTO));
-    }
+    stompClient.send("/app/typing", {}, JSON.stringify(dto));
 }
 
-/* ===========================================================
-   TRIGGER TYPING ON KEY PRESS
-=========================================================== */
+
+/* ---------------------------------------------------
+   INPUT TYPING DETECTION
+--------------------------------------------------- */
 document.getElementById("messageInput").addEventListener("input", () => {
     if (!isTyping) {
         isTyping = true;
@@ -202,43 +239,47 @@ document.getElementById("messageInput").addEventListener("input", () => {
 
     clearTimeout(typingTimeout);
 
-    // stop typing after 1.5 sec of inactivity
     typingTimeout = setTimeout(() => {
         isTyping = false;
         sendTyping(false);
     }, 1500);
 });
 
-/* ===========================================================
-   ENTER TO SEND
-=========================================================== */
-document.getElementById("messageInput").addEventListener("keypress", e => {
-    if (e.key === "Enter") sendMessage();
+
+/* ---------------------------------------------------
+   ENTER SEND
+--------------------------------------------------- */
+document.getElementById("messageInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+    }
 });
 
-/* ===========================================================
+
+/* ---------------------------------------------------
    LOGOUT
-=========================================================== */
+--------------------------------------------------- */
 document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("username");
-    sessionStorage.removeItem("username");
-    window.location.href = "/login.html";
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = "login.html";
 });
 
-/* ===========================================================
-   ON PAGE LOAD
-=========================================================== */
+
+/* ---------------------------------------------------
+   PAGE LOAD
+--------------------------------------------------- */
 window.addEventListener("load", async () => {
-    username = sessionStorage.getItem("username") || localStorage.getItem("username");
+    username = localStorage.getItem("username") || sessionStorage.getItem("username");
 
     if (!username) {
-        window.location.href = "/login.html";
+        window.location.href = "login.html";
         return;
     }
 
-    document.getElementById("loggedInUsername").textContent = "Logged in as: " + username;
+    document.getElementById("loggedInUsername").innerText = "Logged as: " + username;
 
     connect(username);
     await loadAllUsers();
 });
-

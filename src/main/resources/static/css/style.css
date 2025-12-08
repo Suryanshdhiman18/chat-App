@@ -286,3 +286,13 @@ body {
     width: 100%;
   }
 }
+
+.ticks {
+    font-size: 14px;
+    margin-left: 6px;
+    color: gray;
+}
+
+.ticks.seen {
+    color: #4fc3f7; /* blue like WhatsApp */
+}

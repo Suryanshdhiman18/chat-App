@@ -3,11 +3,12 @@ package com.example.chatApp.model;
 import java.time.LocalDateTime;
 
 public class Message {
+
+    private String messageId;   // used for ticks (DELIVERED / SEEN)
     private String sender;
     private String content;
     private LocalDateTime timestamp;
 
-    // Constructors
     public Message() {}
 
     public Message(String sender, String content) {
@@ -21,7 +22,16 @@ public class Message {
         this.timestamp = timestamp;
     }
 
-    // Getters and setters
+    /* ---------------------- GETTERS & SETTERS ---------------------- */
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
     public String getSender() {
         return sender;
     }
@@ -46,5 +56,3 @@ public class Message {
         this.timestamp = timestamp;
     }
 }
-
-
