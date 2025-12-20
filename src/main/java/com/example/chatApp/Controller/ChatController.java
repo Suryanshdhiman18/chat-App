@@ -1,23 +1,97 @@
+//package com.example.chatApp.Controller;
+//
+//import com.example.chatApp.model.Message;
+//import com.example.chatApp.model.MessageStatusDTO;
+//import com.example.chatApp.model.MessageTypingDTO;
+//import org.springframework.messaging.handler.annotation.DestinationVariable;
+//import org.springframework.messaging.handler.annotation.MessageMapping;
+//import org.springframework.messaging.handler.annotation.Payload;
+//import org.springframework.messaging.handler.annotation.SendTo;
+//import org.springframework.messaging.simp.SimpMessagingTemplate;
+//import org.springframework.stereotype.Controller;
+//import org.springframework.web.bind.annotation.GetMapping;
+//
+//@Controller
+//public class ChatController {
+//
+//    private final SimpMessagingTemplate simpMessagingTemplate;
+//
+//    public ChatController(SimpMessagingTemplate simpMessagingTemplate) {
+//        this.simpMessagingTemplate = simpMessagingTemplate;
+//    }
+//
+//    @GetMapping("/")
+//    public String home() {
+//        return "redirect:/login.html";
+//    }
+//
+//    // BROADCAST
+//    @MessageMapping("/chat.broadcast")
+//    @SendTo("/topic/public")
+//    public Message sendPublicMessage(@Payload Message message) {
+//        System.out.println("MessageID = " + message.getMessageId());
+//        return message;
+//    }
+//
+//    // PRIVATE CHAT
+//    @MessageMapping("/chat.private.{receiver}")
+//    public void sendPrivateMessage(@DestinationVariable String receiver, Message message) {
+//        System.out.println("Private messageId = " + message.getMessageId());
+//        simpMessagingTemplate.convertAndSendToUser(receiver, "/queue/private", message);
+//    }
+//
+//    // TYPING INDICATOR
+//    @MessageMapping("/typing")
+//    public void typing(MessageTypingDTO typingDTO) {
+//        if (typingDTO.getType().equals("broadcast")) {
+//            simpMessagingTemplate.convertAndSend("/topic/typing", typingDTO);
+//        } else {
+//            simpMessagingTemplate.convertAndSendToUser(
+//                    typingDTO.getReceiver(),
+//                    "/queue/typing",
+//                    typingDTO
+//            );
+//        }
+//    }
+//
+//    // MESSAGE STATUS (DELIVERED / SEEN)
+//    @MessageMapping("/chat.status.{receiver}")
+//    public void updateStatus(@DestinationVariable String receiver, MessageStatusDTO statusDTO) {
+//
+//        // Forward status update back to original sender
+//        simpMessagingTemplate.convertAndSendToUser(
+//                statusDTO.getSender(),
+//                "/queue/status",
+//                statusDTO
+//        );
+//    }
+//}
+
 package com.example.chatApp.Controller;
 
 import com.example.chatApp.model.Message;
 import com.example.chatApp.model.MessageStatusDTO;
 import com.example.chatApp.model.MessageTypingDTO;
+import com.example.chatApp.service.MessageService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 public class ChatController {
 
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final MessageService messageService;
 
-    public ChatController(SimpMessagingTemplate simpMessagingTemplate) {
-        this.simpMessagingTemplate = simpMessagingTemplate;
+    public ChatController(SimpMessagingTemplate messagingTemplate,
+                          MessageService messageService) {
+        this.messagingTemplate = messagingTemplate;
+        this.messageService = messageService;
     }
 
     @GetMapping("/")
@@ -25,28 +99,42 @@ public class ChatController {
         return "redirect:/login.html";
     }
 
-    // BROADCAST
+    /* ---------------- PUBLIC CHAT ---------------- */
     @MessageMapping("/chat.broadcast")
-    @SendTo("/topic/public")
-    public Message sendPublicMessage(@Payload Message message) {
-        System.out.println("MessageID = " + message.getMessageId());
-        return message;
+    public void broadcast(@Payload Message msg) {
+        messageService.save(msg);
+        messagingTemplate.convertAndSend("/topic/public", msg);
     }
 
-    // PRIVATE CHAT
+    /* ---------------- PRIVATE CHAT ---------------- */
     @MessageMapping("/chat.private.{receiver}")
-    public void sendPrivateMessage(@DestinationVariable String receiver, Message message) {
-        System.out.println("Private messageId = " + message.getMessageId());
-        simpMessagingTemplate.convertAndSendToUser(receiver, "/queue/private", message);
+    public void privateChat(@DestinationVariable String receiver,
+                            @Payload Message msg) {
+
+        messageService.save(msg);
+
+        messagingTemplate.convertAndSendToUser(
+                receiver,
+                "/queue/private",
+                msg
+        );
     }
 
-    // TYPING INDICATOR
+    /* ---------------- HISTORY API ---------------- */
+    @GetMapping("/history/{u1}/{u2}")
+    @ResponseBody
+    public List<Message> history(@PathVariable String u1,
+                                 @PathVariable String u2) {
+        return messageService.getChat(u1, u2);
+    }
+
+    /* ---------------- TYPING ---------------- */
     @MessageMapping("/typing")
     public void typing(MessageTypingDTO typingDTO) {
         if (typingDTO.getType().equals("broadcast")) {
-            simpMessagingTemplate.convertAndSend("/topic/typing", typingDTO);
+            messagingTemplate.convertAndSend("/topic/typing", typingDTO);
         } else {
-            simpMessagingTemplate.convertAndSendToUser(
+            messagingTemplate.convertAndSendToUser(
                     typingDTO.getReceiver(),
                     "/queue/typing",
                     typingDTO
@@ -54,15 +142,12 @@ public class ChatController {
         }
     }
 
-    // MESSAGE STATUS (DELIVERED / SEEN)
+    /* ---------------- STATUS (DELIVERED/SEEN) ---------------- */
     @MessageMapping("/chat.status.{receiver}")
-    public void updateStatus(@DestinationVariable String receiver, MessageStatusDTO statusDTO) {
-
-        // Forward status update back to original sender
-        simpMessagingTemplate.convertAndSendToUser(
-                statusDTO.getSender(),
-                "/queue/status",
-                statusDTO
+    public void status(@Payload MessageStatusDTO statusDTO) {
+        messagingTemplate.convertAndSendToUser(
+                statusDTO.getSender(), "/queue/status", statusDTO
         );
     }
 }
+

@@ -29,13 +29,22 @@ function connect(user) {
         });
 
         /* ----------- PRIVATE MESSAGES ----------- */
-        stompClient.subscribe("/user/queue/private", function (msg) {
-            const m = JSON.parse(msg.body);
-            showMessage(m, false);
+      stompClient.subscribe("/user/queue/private", function (msg) {
+          const m = JSON.parse(msg.body);
 
-            // After receiving → send SEEN status
-            sendStatus(m.messageId, m.sender, "SEEN");
-        });
+          /* Show ONLY if message belongs to currently open chat */
+          if (
+              (m.sender === currentChatUser && m.receiver === username) ||
+              (m.sender === username && m.receiver === currentChatUser)
+          ) {
+              showMessage(m, false);
+          }
+
+          /* Send seen status to the sender */
+          sendStatus(m.messageId, m.sender, "SEEN");
+      });
+
+
 
         /* ----------- TYPING INDICATION ----------- */
         stompClient.subscribe("/topic/typing", msg => handleTyping(JSON.parse(msg.body)));
@@ -65,17 +74,13 @@ async function loadAllUsers() {
     updateUserListUI();
 }
 
-
-/* ---------------------------------------------------
-   UPDATE CONTACT LIST
---------------------------------------------------- */
 function updateUserListUI() {
     const list = document.getElementById("contactList");
     if (!list || !window.allUsers) return;
 
     const header = list.querySelector('.contact[data-username="broadcast"]');
-    list.innerHTML = "";
-    if (header) list.appendChild(header);
+        list.innerHTML = "";
+        if (header) list.appendChild(header);
 
     window.allUsers.forEach(user => {
         if (user === username) return;
@@ -85,22 +90,82 @@ function updateUserListUI() {
         const div = document.createElement("div");
         div.classList.add("contact");
         div.dataset.username = user;
-        div.innerHTML = `<div class='contact-name'>${isOnline} ${user}</div>`;
+
+        div.innerHTML = `
+            <div class='contact-name'>
+                ${isOnline} ${user}
+            </div>
+        `;
 
         div.addEventListener("click", () => {
+
+            /* -------------------------------
+               1. Update current chat receiver
+            -------------------------------- */
             currentChatUser = user;
             document.getElementById("receiver").value = user;
             document.getElementById("chatType").value = "private";
 
+            /* -------------------------------
+               2. Update UI highlight
+            -------------------------------- */
             document.querySelectorAll(".contact").forEach(c => c.classList.remove("active"));
             div.classList.add("active");
 
+            /* -------------------------------
+               3. Update chat header (top name)
+            -------------------------------- */
             document.getElementById("chatWith").innerText = user;
+
+            /* -------------------------------
+               4. Clear old chat messages
+            -------------------------------- */
+            const msgBox = document.getElementById("messages");
+            msgBox.innerHTML = "";
+
+            /* -------------------------------
+               5. Load new chat from DB
+            -------------------------------- */
+            loadChatHistory(user);
+
+            /* -------------------------------
+               6. Stop typing animation
+            -------------------------------- */
+            document.getElementById("typingIndicator").innerHTML = "";
         });
 
         list.appendChild(div);
     });
 }
+
+
+/* ---------------------------------------------------
+   LOAD MESSAGE HISTORY (NEW FUNCTION)
+--------------------------------------------------- */
+//function loadChatHistory(otherUser) {
+//    fetch(`/api/messages/history/${username}/${otherUser}`)
+//        .then(res => res.json())
+//        .then(messages => {
+//            const msgBox = document.getElementById("messages");
+//            msgBox.innerHTML = "";
+//
+//            messages.forEach(m => showMessage(m, false));
+//        });
+//}
+
+function loadChatHistory(otherUser) {
+     fetch(`/api/messages/history/${username}/${otherUser}`)
+        .then(res => res.json())
+        .then(messages => {
+            const msgBox = document.getElementById("messages");
+            msgBox.innerHTML = ""; // Clear previous chat
+
+            messages.forEach(m => {
+                showMessage(m, m.sender === username);
+            });
+        });
+}
+
 
 
 /* ---------------------------------------------------
@@ -119,6 +184,7 @@ function sendMessage() {
     const msg = {
         messageId: messageId,
         sender: username,
+        receiver: receiver,
         content: text,
         timestamp: new Date().toISOString()
     };
