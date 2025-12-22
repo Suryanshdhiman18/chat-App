@@ -1,4 +1,4 @@
-package com.example.chatApp.model;
+package com.example.chatApp.dto;
 
 public class MessageTypingDTO {
     private String sender;
