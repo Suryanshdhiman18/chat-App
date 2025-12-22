@@ -1,8 +1,8 @@
 //package com.example.chatApp.Controller;
 //
 //import com.example.chatApp.model.Message;
-//import com.example.chatApp.model.MessageStatusDTO;
-//import com.example.chatApp.model.MessageTypingDTO;
+//import com.example.chatApp.dto.MessageStatusDTO;
+//import com.example.chatApp.dto.MessageTypingDTO;
 //import org.springframework.messaging.handler.annotation.DestinationVariable;
 //import org.springframework.messaging.handler.annotation.MessageMapping;
 //import org.springframework.messaging.handler.annotation.Payload;
@@ -70,8 +70,8 @@
 package com.example.chatApp.Controller;
 
 import com.example.chatApp.model.Message;
-import com.example.chatApp.model.MessageStatusDTO;
-import com.example.chatApp.model.MessageTypingDTO;
+import com.example.chatApp.dto.MessageStatusDTO;
+import com.example.chatApp.dto.MessageTypingDTO;
 import com.example.chatApp.service.MessageService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
