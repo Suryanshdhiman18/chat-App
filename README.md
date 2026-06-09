@@ -193,7 +193,7 @@ This project demonstrates:
 
 **Suryansh Dhiman**
 
-Associate QA Engineer | Aspiring SDET & Backend Developer
+Associate Software Engineer | Backend Developer & SDET
 
 GitHub: https://github.com/Suryanshdhiman18
 
